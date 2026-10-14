@@ -77,3 +77,7 @@ config file to create, and nothing in this repo needs to be kept secret.
 4. Pick a background and a foreground color.
 5. Click **Create Puzzle**. The key row shows the solution numbers; each
    cell shows a problem whose answer is one of those numbers.
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE).
