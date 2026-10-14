@@ -1,0 +1,40 @@
+# Mathsaic never has config, data, keys, or tokens (pure static site),
+# but these patterns must never be committed if anyone adds them later.
+
+# Local configuration / environment
+.env
+.env.*
+*.env
+config.env
+*.local
+*.conf.local
+
+# Data / databases
+*.db
+*.sqlite
+*.sqlite3
+*.jsonl
+data/
+deploy/
+*.bak
+*.tmp
+
+# Keys, keystores, certificates, tokens
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+*.crt
+*.cer
+*token*
+*secret*
+credentials*
+.credentials/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*~
+*.swp

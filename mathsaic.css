@@ -1,0 +1,69 @@
+#mathsaic_options, #mathsaic_puzzle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  padding: 10px;
+}
+#mathsaic_options {
+  left: 0;
+  width: 200px;
+  background: #eee;
+}
+#mathsaic_puzzle {
+  left: 200px;
+  right: 0;
+  background: white;
+}
+
+
+table {
+  border-collapse: collapse;
+}
+table.wrapper {
+  border-right: 1px solid black;
+}
+td {
+  padding: 0px;
+  height: 20px;
+}
+.letters td, .key td {
+  height: 50px;
+  width: 50px;
+  padding: 0px;
+  text-align: center;
+  font-size: 12px;
+  border-style: solid;
+  border-width: 1px;
+  -webkit-print-color-adjust: exact;
+}
+.letters td {
+  border-right: none;
+  cursor: pointer;
+}
+table.key {
+  margin-bottom: 50px;
+}
+.box {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  margin-left: 20px;
+}
+.selected {
+  border-style: solid;
+  border-color: black;
+  border-width: 2px;
+  margin-left: 17px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #mathsaic_puzzle, #mathsaic_puzzle * {
+    visibility: visible;
+  }
+  #mathsaic_puzzle {
+    left: 0;
+  }
+}
