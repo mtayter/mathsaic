@@ -72,31 +72,45 @@ mathsaic.options = (function() {
       return;
     }
 
-    // preserve names already typed
-    var savedNames = [];
-    $('.player-name').each(function(i) { savedNames[i] = this.value; });
+    // preserve everything already entered for existing players (name,
+    // operations, negatives, level; the color theme lives in playerThemes)
+    var saved = [];
+    $('.player-row').each(function(i) {
+      var $row = $(this);
+      saved[i] = {
+        name: $row.find('.player-name').val(),
+        operations: $row.find('.player-op:checked').map(function() { return this.value; }).get(),
+        negative: $row.find('.player-negative').prop('checked'),
+        level: $row.find('.player-level').val()
+      };
+    });
 
     var html = '';
     for(var p = 0; p < count; p++) {
       if(playerThemes[p] == null) {
         playerThemes[p] = p % themes.length;
       }
+      var prev = saved[p];
+      var level = prev ? prev.level : '0';
       html += '<div class="player-row">'
             +   '<div class="player-head">🧩 Player ' + (p + 1) + '</div>'
             +   '<label class="field">name <input type="text" class="player-name" id="player_name_' + p + '" size="14"' + (p == 0 ? ' placeholder="e.g. Hannah"' : '') + '></label>'
             +   '<span class="op-group">';
       for(var o = 0; o < OPERATIONS.length; o++) {
+        var opVal = OPERATIONS[o].value;
+        var checked = prev ? (prev.operations.indexOf(opVal) != -1)
+                           : (opVal == '+' || opVal == '-');
         html += '<label class="check">'
-              + '<input type="checkbox" class="player-op" data-player="' + p + '" value="' + OPERATIONS[o].value + '"'
-              + (OPERATIONS[o].value == '+' || OPERATIONS[o].value == '-' ? ' checked' : '')
+              + '<input type="checkbox" class="player-op" data-player="' + p + '" value="' + opVal + '"'
+              + (checked ? ' checked' : '')
               + '> ' + OPERATIONS[o].label + '</label>';
       }
       html +=   '</span>'
-            +   '<label class="check"><input type="checkbox" class="player-negative" id="player_negative_' + p + '"> negatives?</label>'
+            +   '<label class="check"><input type="checkbox" class="player-negative" id="player_negative_' + p + '"' + (prev && prev.negative ? ' checked' : '') + '> negatives?</label>'
             +   '<label class="field">level <select class="player-level" id="player_level_' + p + '">'
-            +     '<option value="0">easy</option>'
-            +     '<option value="1">medium</option>'
-            +     '<option value="2">hard</option>'
+            +     '<option value="0"' + (level == '0' ? ' selected' : '') + '>easy</option>'
+            +     '<option value="1"' + (level == '1' ? ' selected' : '') + '>medium</option>'
+            +     '<option value="2"' + (level == '2' ? ' selected' : '') + '>hard</option>'
             +   '</select></label>'
             +   '<span class="color-group"><span class="color-label">colors</span>' + themeSwatches(p) + '</span>'
             + '</div>';
@@ -104,8 +118,8 @@ mathsaic.options = (function() {
     $('#players_container').html(html);
 
     for(var q = 0; q < count; q++) {
-      if(savedNames[q]) {
-        $('#player_name_' + q).val(savedNames[q]);
+      if(saved[q] && saved[q].name) {
+        $('#player_name_' + q).val(saved[q].name);
       }
       var chosen = playerThemes[q];
       playerThemes[q] = null;
