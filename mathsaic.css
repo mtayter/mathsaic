@@ -322,15 +322,35 @@ table.key {
   #mathsaic_puzzle {
     padding: 0;
   }
+  /* Do NOT size print pages with 100vh: phone print pipelines measure vh
+     taller than the printable area, which splits the page box across two
+     sheets and strands the bottom-anchored footer on its own page.
+     Instead each page sizes to its content, may not break inside itself,
+     and the footer flows right under the puzzle (still centered), so it
+     always lands on the same sheet as its puzzle. */
   .hunt-page {
     border: none;
     border-radius: 0;
     box-shadow: none;
     margin: 0;
     max-width: none;
-    height: 100vh;
+    height: auto;
+    min-height: 0;
+    padding: 10px 0 0;
+    display: block;
     page-break-after: always;
     break-after: page;
+  }
+  /* puzzle pages always fit on one sheet, so forbid breaking inside them;
+     the final page may legitimately be long, so let it break naturally */
+  .hunt-page:not(.hunt-final) {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .hunt-footer {
+    position: static;
+    margin-top: 40px;
+    text-align: center;
   }
   .hunt-page:last-child {
     page-break-after: auto;
