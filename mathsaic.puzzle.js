@@ -147,9 +147,14 @@ mathsaic.puzzle = (function() {
   }
   
   function buildKey() {
+    // colors[0] is a light background color (black text), colors[1] a much
+    // darker foreground color (white text), so the key stays legible even
+    // when printed in greyscale.
     var tbl = "<table class='key'><tr>";
     for(var i=0; i<solutions.length; i++) {
-      tbl += "<td style='background-color:" + options.colors[i%2] + "'>" + solutions[i] + "</td>";
+      tbl += "<td style='background-color:" + options.colors[i%2]
+           + ";color:" + (i%2 ? "#ffffff" : "#000000")
+           + "'>" + solutions[i] + "</td>";
     }
     tbl += "</tr></table>";
     return tbl;

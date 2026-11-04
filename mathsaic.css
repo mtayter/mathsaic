@@ -1,48 +1,104 @@
-body {
-  font-family: sans-serif;
-  margin: 0;
+* {
+  box-sizing: border-box;
 }
 
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(180deg, #eef7ee 0%, #f4f6fb 220px, #f4f6fb 100%);
+  color: #1e293b;
+}
+
+/* ---- maker form -------------------------------------------------------- */
+
 #mathsaic_options {
-  padding: 16px 20px;
-  background: #eee;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 24px 20px 8px;
 }
 #mathsaic_puzzle {
   padding: 10px;
-  background: white;
 }
 
-#mathsaic_options h1 {
-  font-size: 22px;
+.hero {
+  background: linear-gradient(120deg, #16a34a, #0d9488);
+  color: white;
+  border-radius: 16px;
+  padding: 22px 26px;
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.28);
+}
+.hero h1 {
+  font-size: 27px;
   margin: 0 0 8px;
 }
-#mathsaic_options h2 {
-  font-size: 17px;
-  margin: 18px 0 8px;
+.hero .intro {
+  margin: 0;
+  max-width: 760px;
+  line-height: 1.5;
+  color: #e7f9ee;
 }
-#mathsaic_options .intro,
-#mathsaic_options .hint {
-  max-width: 720px;
-  margin: 4px 0 10px;
+
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  padding: 18px 22px 20px;
+  margin: 18px 0;
+}
+.card h2 {
+  font-size: 19px;
+  margin: 0 0 12px;
+}
+.card .hint {
+  margin: 0 0 10px;
+  color: #475569;
+}
+
+.field input[type="text"],
+.field input[type="number"],
+.field select {
+  padding: 7px 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 15px;
+  background: white;
+}
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
+input[type="checkbox"] {
+  accent-color: #16a34a;
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
 }
 
 .player-row {
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  background: #f8f8f8;
-  padding: 10px 12px;
-  margin: 8px 0;
+  border: 1px solid #e2e8f0;
+  border-left: 6px solid #0d9488;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px 14px;
+  margin: 10px 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 18px;
-  max-width: 980px;
+}
+.player-row:nth-child(even) {
+  border-left-color: #f59e0b;
 }
 .player-head {
-  font-weight: bold;
+  font-weight: 700;
   width: 100%;
+  font-size: 16px;
 }
-.player-row label {
+.check,
+.field {
   white-space: nowrap;
 }
 .color-group {
@@ -52,14 +108,50 @@ body {
 }
 .color-label {
   font-size: 13px;
+  color: #475569;
 }
 .swatches {
   display: inline-flex;
-  gap: 3px;
+  gap: 4px;
+}
+.theme-swatch {
+  width: 28px;
+  height: 19px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+.theme-swatch.selected {
+  outline: 3px solid #111827;
+  outline-offset: 1px;
 }
 .word-row {
-  margin: 6px 0;
+  margin: 8px 0;
 }
+
+.create-row {
+  text-align: center;
+  margin: 22px 0 8px;
+}
+.btn-primary {
+  background: linear-gradient(120deg, #16a34a, #0d9488);
+  color: white;
+  border: none;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 13px 30px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(13, 148, 136, 0.4);
+}
+
+/* ---- puzzle tables (unchanged mechanics, cleaner type) ------------------- */
 
 table {
   border-collapse: collapse;
@@ -82,6 +174,10 @@ td {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
+.key td {
+  font-weight: 700;
+  font-size: 14px;
+}
 .letters td {
   border-right: none;
   cursor: pointer;
@@ -89,26 +185,35 @@ td {
 table.key {
   margin-bottom: 50px;
 }
-.box {
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-  display: inline-block;
-}
-.selected {
-  outline: 2px solid black;
-  outline-offset: 1px;
-}
 
 /* ---- scavenger hunt output ------------------------------------------- */
 
 .print-note {
   max-width: 800px;
   margin: 12px auto;
-  padding: 10px 14px;
-  background: #eef6ee;
-  border: 1px solid #9c9;
-  border-radius: 6px;
+  padding: 12px 16px;
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 16px;
+}
+.btn-print {
+  background: #16a34a;
+  color: white;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-print:hover {
+  background: #15803d;
 }
 
 .hunt-page {
@@ -117,8 +222,10 @@ table.key {
   min-height: 560px;
   margin: 18px auto;
   padding: 30px 20px 70px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -149,6 +256,9 @@ table.key {
   margin: 0 0 20px;
 }
 .answer-word {
+  display: flex;
+  gap: 44px;
+  align-items: flex-start;
   margin-bottom: 22px; /* blank line between words */
 }
 .answer-line {
@@ -163,8 +273,18 @@ table.key {
 .answer-footer {
   color: #333;
 }
+.answer-instruction {
+  font-size: 16px;
+  font-weight: 600;
+  border-left: 4px solid #16a34a;
+  padding: 4px 0 4px 12px;
+  margin-top: 2px;
+}
 
 @media print {
+  body {
+    background: white;
+  }
   #mathsaic_options,
   .print-note {
     display: none;
@@ -174,6 +294,8 @@ table.key {
   }
   .hunt-page {
     border: none;
+    border-radius: 0;
+    box-shadow: none;
     margin: 0;
     max-width: none;
     height: 100vh;

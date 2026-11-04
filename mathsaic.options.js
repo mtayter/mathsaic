@@ -1,9 +1,23 @@
 mathsaic.options = (function() {
 
-  var colors = ['red','pink','purple','blue','teal','orange','grey','brown'];
+  // Greyscale-safe color themes. Each theme pairs a very light background
+  // with a much darker foreground of the same hue, so the two key colors
+  // stay clearly distinguishable even when printed in greyscale (light grey
+  // vs near-black), and the key numbers can be printed black-on-light /
+  // white-on-dark.
+  var themes = [
+    { name: 'red',    light: '#FFCDD2', dark: '#B71C1C' },
+    { name: 'pink',   light: '#F8BBD0', dark: '#880E4F' },
+    { name: 'purple', light: '#E1BEE7', dark: '#4A148C' },
+    { name: 'blue',   light: '#BBDEFB', dark: '#0D47A1' },
+    { name: 'teal',   light: '#B2DFDB', dark: '#004D40' },
+    { name: 'green',  light: '#C8E6C9', dark: '#1B5E20' },
+    { name: 'orange', light: '#FFE0B2', dark: '#BF360C' },
+    { name: 'brown',  light: '#D7CCC8', dark: '#3E2723' }
+  ];
 
-  // Per-player chosen colors: playerColors[p] = [backgroundIdx, foregroundIdx]
-  var playerColors = [];
+  // Per-player chosen theme index
+  var playerThemes = [];
 
   var OPERATIONS = [
     { value: '+', label: 'addition' },
@@ -31,33 +45,22 @@ mathsaic.options = (function() {
 
   // ---- player rows -------------------------------------------------------
 
-  function defaultColors(p) {
-    var bg = (p * 2 + 5) % colors.length;        // start from a light-ish tone
-    var fg = (p * 2 + 1) % colors.length;
-    if(fg == bg) {
-      fg = (fg + 1) % colors.length;
+  function selectTheme(p, idx) {
+    if(playerThemes[p] != null) {
+      $('#ptheme_' + p + '_' + playerThemes[p]).removeClass('selected');
     }
-    return [bg, fg];
+    playerThemes[p] = idx;
+    $('#ptheme_' + p + '_' + idx).addClass('selected');
   }
 
-  function selectPlayerColor(p, fg, idx) {
-    if(playerColors[p] && playerColors[p][fg] != null) {
-      $('#pcolor_' + p + '_' + fg + '_' + playerColors[p][fg]).removeClass('selected');
-    }
-    if(!playerColors[p]) {
-      playerColors[p] = [null, null];
-    }
-    playerColors[p][fg] = idx;
-    $('#pcolor_' + p + '_' + fg + '_' + idx).addClass('selected');
-  }
-
-  function colorSwatches(p, fg) {
+  function themeSwatches(p) {
     var html = '<span class="swatches">';
-    for(var idx = 0; idx < colors.length; idx++) {
-      html += '<div id="pcolor_' + p + '_' + fg + '_' + idx + '" '
-            + 'onClick="mathsaic.options.selectPlayerColor(' + p + ',' + fg + ',' + idx + ')" '
-            + 'class="box" style="background-color: ' + colors[idx] + '" '
-            + 'title="' + colors[idx] + '"></div>';
+    for(var idx = 0; idx < themes.length; idx++) {
+      var t = themes[idx];
+      html += '<div id="ptheme_' + p + '_' + idx + '" '
+            + 'onClick="mathsaic.options.selectTheme(' + p + ',' + idx + ')" '
+            + 'class="theme-swatch" title="' + t.name + ' (light background, dark foreground)" '
+            + 'style="background: linear-gradient(90deg, ' + t.light + ' 50%, ' + t.dark + ' 50%)"></div>';
     }
     html += '</span>';
     return html;
@@ -75,28 +78,27 @@ mathsaic.options = (function() {
 
     var html = '';
     for(var p = 0; p < count; p++) {
-      if(!playerColors[p]) {
-        playerColors[p] = defaultColors(p);
+      if(playerThemes[p] == null) {
+        playerThemes[p] = p % themes.length;
       }
       html += '<div class="player-row">'
-            +   '<div class="player-head">Player ' + (p + 1) + '</div>'
-            +   '<label>name <input type="text" class="player-name" id="player_name_' + p + '" size="14"></label>'
+            +   '<div class="player-head">🧩 Player ' + (p + 1) + '</div>'
+            +   '<label class="field">name <input type="text" class="player-name" id="player_name_' + p + '" size="14" placeholder="e.g. Hannah"></label>'
             +   '<span class="op-group">';
       for(var o = 0; o < OPERATIONS.length; o++) {
-        html += '<label>' + OPERATIONS[o].label + ' '
+        html += '<label class="check">' + OPERATIONS[o].label + ' '
               + '<input type="checkbox" class="player-op" data-player="' + p + '" value="' + OPERATIONS[o].value + '"'
               + (OPERATIONS[o].value == '+' || OPERATIONS[o].value == '-' ? ' checked' : '')
               + '></label> ';
       }
       html +=   '</span>'
-            +   '<label>negatives? <input type="checkbox" class="player-negative" id="player_negative_' + p + '"></label>'
-            +   '<label>level <select class="player-level" id="player_level_' + p + '">'
+            +   '<label class="check">negatives? <input type="checkbox" class="player-negative" id="player_negative_' + p + '"></label>'
+            +   '<label class="field">level <select class="player-level" id="player_level_' + p + '">'
             +     '<option value="0">easy</option>'
             +     '<option value="1">medium</option>'
             +     '<option value="2">hard</option>'
             +   '</select></label>'
-            +   '<span class="color-group"><span class="color-label">background</span>' + colorSwatches(p, 0) + '</span>'
-            +   '<span class="color-group"><span class="color-label">foreground</span>' + colorSwatches(p, 1) + '</span>'
+            +   '<span class="color-group"><span class="color-label">colors</span>' + themeSwatches(p) + '</span>'
             + '</div>';
     }
     $('#players_container').html(html);
@@ -105,11 +107,9 @@ mathsaic.options = (function() {
       if(savedNames[q]) {
         $('#player_name_' + q).val(savedNames[q]);
       }
-      // mark the pre-chosen default colors as selected
-      var chosen = playerColors[q];
-      playerColors[q] = [null, null];
-      if(chosen[0] != null) { selectPlayerColor(q, 0, chosen[0]); }
-      if(chosen[1] != null) { selectPlayerColor(q, 1, chosen[1]); }
+      var chosen = playerThemes[q];
+      playerThemes[q] = null;
+      selectTheme(q, chosen);
     }
   }
 
@@ -125,8 +125,8 @@ mathsaic.options = (function() {
 
     var html = '';
     for(var w = 0; w < count; w++) {
-      html += '<div class="word-row"><label>word ' + (w + 1) + ' '
-            + '<input type="text" class="hunt-word" id="hunt_word_' + w + '" size="18">'
+      html += '<div class="word-row"><label class="field">word ' + (w + 1) + ' '
+            + '<input type="text" class="hunt-word" id="hunt_word_' + w + '" size="18" placeholder="e.g. attic">'
             + '</label></div>';
     }
     $('#words_container').html(html);
@@ -157,17 +157,18 @@ mathsaic.options = (function() {
         return null;
       }
       var level = $('#player_level_' + p).val();
-      if(playerColors[p] == null || playerColors[p][0] == null || playerColors[p][1] == null) {
-        alert(name + ' must have both colors chosen');
+      if(playerThemes[p] == null) {
+        alert(name + ' must have a color theme chosen');
         return null;
       }
+      var theme = themes[playerThemes[p]];
       players.push({
         name: name,
         options: {
           operations: operations,
           negative: $('#player_negative_' + p).prop('checked'),
           level: parseInt(level, 10),
-          colors: [colors[playerColors[p][0]], colors[playerColors[p][1]]]
+          colors: [theme.light, theme.dark]
         }
       });
     }
@@ -198,26 +199,51 @@ mathsaic.options = (function() {
   // ---- hunt generation -------------------------------------------------------
 
   // Divide each word's letters randomly, as evenly as possible, among the
-  // players. Returns { pages: [...in print order...], answerKey: [...] }.
+  // players. When a word's letter count is not divisible by the player
+  // count, the extra letters go to the players who have received the fewest
+  // letters so far (ties broken randomly), so the rotation evens out and
+  // the running totals per player never differ by more than one.
+  // Returns { pages: [...in print order...], answerKey: [...] }.
   function distribute(words, players) {
     var allPages = [];
     var answerKey = [];
+    var totals = players.map(function() { return 0; });
 
     for(var w = 0; w < words.length; w++) {
       var wordNum = w + 1;
-      var letterObjs = [];
-      for(var i = 0; i < words[w].length; i++) {
-        letterObjs.push({ letter: words[w][i], pos: i });
+      var len = words[w].length;
+      var base = Math.floor(len / players.length);
+      var extras = len % players.length;
+
+      // rank players by running total (ascending); shuffle first so ties
+      // are broken randomly (Array.sort is stable)
+      var ranked = shuffle(players.map(function(_, idx) { return idx; }));
+      ranked.sort(function(a, b) { return totals[a] - totals[b]; });
+
+      var quota = players.map(function() { return base; });
+      for(var e = 0; e < extras; e++) {
+        quota[ranked[e]]++;
       }
 
-      // shuffle the letters, then deal them round-robin over a shuffled
-      // player order: counts per player differ by at most one.
-      var dealt = shuffle(letterObjs.slice());
-      var order = shuffle(players.map(function(_, idx) { return idx; }));
+      // assignment pool: each player repeated quota times, shuffled, then
+      // dealt to the word's shuffled letters
+      var pool = [];
+      for(var pi = 0; pi < players.length; pi++) {
+        for(var n = 0; n < quota[pi]; n++) {
+          pool.push(pi);
+        }
+        totals[pi] += quota[pi];
+      }
+      shuffle(pool);
+
+      var dealt = shuffle(words[w].split('').map(function(ch, i) {
+        return { letter: ch, pos: i };
+      }));
+
       var wordPages = [];
       var byPos = [];
       for(var d = 0; d < dealt.length; d++) {
-        var playerIdx = order[d % players.length];
+        var playerIdx = pool[d];
         var page = {
           wordNum: wordNum,
           letter: dealt[d].letter,
@@ -243,9 +269,11 @@ mathsaic.options = (function() {
     if(!words) { return; }
 
     var hunt = distribute(words, players);
+    var lastWord = words[words.length - 1].toUpperCase();
 
-    var html = '<div class="print-note">Your scavenger hunt is ready below. Print this page '
-             + '(one puzzle per printed page), then follow the instructions on the last page.</div>';
+    var html = '<div class="print-note"><span>Your scavenger hunt is ready. '
+             + 'Click print then follow the instructions on the last page.</span> '
+             + '<button type="button" class="btn-print" onclick="window.print()">🖨️ Print</button></div>';
 
     for(var i = 0; i < hunt.pages.length; i++) {
       var page = hunt.pages[i];
@@ -259,18 +287,25 @@ mathsaic.options = (function() {
 
     // last page: instructions + answer key
     html += '<div class="hunt-page hunt-final">'
-          +   '<h2>Instructions</h2>'
+          +   '<h2>📋 Instructions</h2>'
           +   '<ol class="instructions">'
-          +     '<li>Put each word into its own envelope.</li>'
-          +     '<li>Hide all but the 1st envelope in the location indicated by the previous word.</li>'
-          +     '<li>Put a prize in the location indicated by the last word.</li>'
-          +     '<li>Hand the team the first envelope.</li>'
+          +     '<li>Put each word into its own numbered envelope.</li>'
+          +     '<li>Place envelopes per instructions in answer key below.</li>'
+          +     '<li>Put a prize in <strong>' + escapeHtml(lastWord) + '</strong>.</li>'
           +   '</ol>'
-          +   '<h2>Answer Key</h2>'
+          +   '<h2>🔑 Answer Key</h2>'
           +   '<div class="answer-key">';
     for(var k = 0; k < hunt.answerKey.length; k++) {
       var entry = hunt.answerKey[k];
-      html += '<div class="answer-word">';
+      var instruction;
+      if(k == 0) {
+        instruction = 'Hand envelope #1 to the team';
+      } else {
+        instruction = 'Put envelope #' + entry.wordNum + ' in '
+                    + hunt.answerKey[k - 1].word.toUpperCase();
+      }
+      html += '<div class="answer-word">'
+            +   '<div class="answer-letters">';
       for(var j = 0; j < entry.pagesByPos.length; j++) {
         var pg = entry.pagesByPos[j];
         html += '<div class="answer-line">'
@@ -278,7 +313,9 @@ mathsaic.options = (function() {
               +   '<span class="answer-footer">' + escapeHtml(pg.footer) + '</span>'
               + '</div>';
       }
-      html += '</div>';
+      html +=   '</div>'
+            +   '<div class="answer-instruction">➡️ ' + escapeHtml(instruction) + '</div>'
+            + '</div>';
     }
     html +=   '</div>'
           + '</div>';
@@ -290,22 +327,28 @@ mathsaic.options = (function() {
   // ---- init -------------------------------------------------------------------
 
   function init($container) {
-    var input = '<h1>Mathsaic Scavenger Hunt Maker</h1>'
+    var input = '<div class="hero">'
+      + '<h1>🧩 Mathsaic Scavenger Hunt Maker</h1>'
       + '<p class="intro">Build a scavenger hunt out of Mathsaic letter puzzles. '
       + 'Each word is a clue as to where the next word (or the final prize) can be found. '
       + 'The letters of each word are split between the players, so the team has to solve '
       + 'everyone\'s puzzles and put the letters together to read each clue.</p>'
+      + '</div>'
 
-      + '<h2>Players</h2>'
-      + '<label>how many players? <input type="number" id="num_players" min="1" max="12" value="2"></label>'
+      + '<section class="card">'
+      + '<h2>👥 Players</h2>'
+      + '<label class="field">how many players? <input type="number" id="num_players" min="1" max="12" value="2"></label>'
       + '<div id="players_container"></div>'
+      + '</section>'
 
-      + '<h2>Words</h2>'
+      + '<section class="card">'
+      + '<h2>🔤 Words</h2>'
       + '<p class="hint">Each word is a clue as to where the next word (or final prize) can be found.</p>'
-      + '<label>how many words? <input type="number" id="num_words" min="1" max="20" value="3"></label>'
+      + '<label class="field">how many words? <input type="number" id="num_words" min="1" max="20" value="3"></label>'
       + '<div id="words_container"></div>'
+      + '</section>'
 
-      + '<p><input type="button" id="create_hunt" value="Create Scavenger Hunt"></p>';
+      + '<p class="create-row"><button type="button" id="create_hunt" class="btn-primary">🎯 Create Scavenger Hunt</button></p>';
 
     $container.html(input);
 
@@ -319,7 +362,7 @@ mathsaic.options = (function() {
 
   return {
     init: init,
-    selectPlayerColor: selectPlayerColor,
+    selectTheme: selectTheme,
     launchHunt: launchHunt
   };
 
