@@ -74,7 +74,38 @@ input[type="checkbox"] {
   accent-color: #16a34a;
   width: 16px;
   height: 16px;
-  vertical-align: -3px;
+  margin: 0;
+  flex: none;
+}
+
+/* Each checkbox + its label is one clickable pill ("chip"): the box leads
+   its own word, the pill border groups them as a single unit, and the
+   whole pill fills green when on — so a box can never be mistaken for
+   belonging to the neighboring label. */
+.op-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+label.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px 6px 9px;
+  background: white;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+label.check:hover {
+  border-color: #16a34a;
+}
+label.check:has(input:checked) {
+  background: #dcfce7;
+  border-color: #16a34a;
+  font-weight: 600;
 }
 
 .player-row {
@@ -97,7 +128,6 @@ input[type="checkbox"] {
   width: 100%;
   font-size: 16px;
 }
-.check,
 .field {
   white-space: nowrap;
 }

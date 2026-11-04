@@ -86,13 +86,13 @@ mathsaic.options = (function() {
             +   '<label class="field">name <input type="text" class="player-name" id="player_name_' + p + '" size="14" placeholder="e.g. Hannah"></label>'
             +   '<span class="op-group">';
       for(var o = 0; o < OPERATIONS.length; o++) {
-        html += '<label class="check">' + OPERATIONS[o].label + ' '
+        html += '<label class="check">'
               + '<input type="checkbox" class="player-op" data-player="' + p + '" value="' + OPERATIONS[o].value + '"'
               + (OPERATIONS[o].value == '+' || OPERATIONS[o].value == '-' ? ' checked' : '')
-              + '></label> ';
+              + '> ' + OPERATIONS[o].label + '</label>';
       }
       html +=   '</span>'
-            +   '<label class="check">negatives? <input type="checkbox" class="player-negative" id="player_negative_' + p + '"></label>'
+            +   '<label class="check"><input type="checkbox" class="player-negative" id="player_negative_' + p + '"> negatives?</label>'
             +   '<label class="field">level <select class="player-level" id="player_level_' + p + '">'
             +     '<option value="0">easy</option>'
             +     '<option value="1">medium</option>'
