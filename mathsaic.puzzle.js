@@ -128,13 +128,9 @@ mathsaic.puzzle = (function() {
     options = o;
 
     populateSolutions();
- 
+
     // create key
-    tbl = "<table class='key'><tr>";
-    for(var i=0; i<solutions.length; i++) {
-      tbl += "<td style='background-color:" + options.colors[i%2] + "'>" + solutions[i] + "</td>";
-    }
-    tbl += "</tr></table>";
+    tbl = buildKey();
 
     // create puzzle
     tbl += "<table class='wrapper'><tr>";
@@ -150,6 +146,32 @@ mathsaic.puzzle = (function() {
     $container.html(tbl);
   }
   
+  function buildKey() {
+    var tbl = "<table class='key'><tr>";
+    for(var i=0; i<solutions.length; i++) {
+      tbl += "<td style='background-color:" + options.colors[i%2] + "'>" + solutions[i] + "</td>";
+    }
+    tbl += "</tr></table>";
+    return tbl;
+  }
+
+  // Build one standalone puzzle page body (key + a single letter) using the
+  // given player's options. A fresh key/solution set is generated per call.
+  function createSingleLetterPuzzle(letter, o) {
+
+    options = o;
+
+    populateSolutions();
+
+    var tbl = buildKey();
+
+    tbl += "<table class='wrapper'><tr>";
+    tbl += "<td>" + createLetter(letter) + "</td>";
+    tbl += "</tr></table>";
+
+    return tbl;
+  }
+
   function getKeys() {
     return keys;
   }
@@ -191,7 +213,8 @@ mathsaic.puzzle = (function() {
   return {
     init: init,
     getKeys: getKeys,
-    createPuzzle: createPuzzle
+    createPuzzle: createPuzzle,
+    createSingleLetterPuzzle: createSingleLetterPuzzle
   };
 
 }());

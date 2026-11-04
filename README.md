@@ -1,15 +1,24 @@
 # Mathsaic
 
-Mathsaic is a small puzzle generator: pick a short word (up to 4 letters),
-choose arithmetic operations, a difficulty level, and two colors, and it
-renders the word as a mosaic of arithmetic problems. Each cell's problem
-evaluates to a number in the key; the two colors encode the key's parity
-pattern, so solving the problems reveals the word. A print stylesheet
-hides the options panel so only the puzzle prints.
+Mathsaic is a scavenger hunt maker built on a small math-mosaic puzzle
+generator. In a Mathsaic puzzle, a letter is rendered as a mosaic of
+arithmetic problems: each cell's problem evaluates to a number in the key,
+and the key's two colors encode which cells belong to the letter, so solving
+the problems reveals the letter.
+
+To make a hunt, you enter the players (each with their own puzzle settings —
+operations, negatives, difficulty level, and colors) and a list of clue
+words. Each word is a clue as to where the next word (or the final prize)
+can be found. The generator divides the letters of each word randomly, and
+as evenly as possible, among the players, and produces a printable set of
+pages: one puzzle page per letter (pages ordered by word, letters within a
+word in random order, each page footered with `[word number]-[player
+name]`), plus a final page with hiding instructions and an answer key that
+lists each word acrostic-style with the page footer for every letter.
 
 It is a **pure client-side static site**: HTML + CSS + vanilla JavaScript.
 There is no backend, no database, no account, and no stored state — every
-puzzle is generated in the browser on the spot.
+hunt is generated in the browser on the spot.
 
 ## Files
 
@@ -17,9 +26,9 @@ puzzle is generated in the browser on the spot.
 | --- | --- |
 | `index.html` | Page shell; loads jQuery (CDN, SRI-pinned) and the scripts below |
 | `mathsaic.js` | Entry point: builds the options + puzzle panes |
-| `mathsaic.options.js` | Options panel: word, operations, negatives, level, colors |
+| `mathsaic.options.js` | Hunt maker form (players, words), letter distribution, and printable hunt output |
 | `mathsaic.puzzle.js` | Puzzle generator: letter bitmaps, key, problem generation |
-| `mathsaic.css` | Layout + print stylesheet |
+| `mathsaic.css` | Layout + print stylesheet (one puzzle per printed page) |
 | `install.sh` | Installer (copy to a web directory + optional local preview) |
 
 ## Dependencies
@@ -68,15 +77,23 @@ config file to create, and nothing in this repo needs to be kept secret.
 
 ## Use
 
-1. Type a word of up to 4 letters (only letters a–z; the word's letters
-   must exist in the letter set, which is the full alphabet).
-2. Check at least one operation (addition, subtraction, multiplication,
-   division, plain number).
-3. Optionally allow negatives; pick a difficulty level (easy / medium /
-   hard).
-4. Pick a background and a foreground color.
-5. Click **Create Puzzle**. The key row shows the solution numbers; each
-   cell shows a problem whose answer is one of those numbers.
+1. Choose how many players there are. For each player, enter their name
+   and their Mathsaic settings: at least one operation (addition,
+   subtraction, multiplication, division, plain number), whether negatives
+   are allowed, a difficulty level (easy / medium / hard), and a
+   background and foreground color.
+2. Choose how many words the hunt has, and enter them (letters a–z only).
+   Each word is a clue as to where the next word (or final prize) can be
+   found — e.g. if the envelope after the first belongs in the attic, the
+   first word is `attic`.
+3. Click **Create Scavenger Hunt**. The letters of each word are divided
+   randomly, and as evenly as possible, between the players, with each
+   letter generated using its player's settings.
+4. Print the result. Each letter gets its own page, footered
+   `[word number]-[player name]` (e.g. `2-Hannah`); pages are ordered by
+   word number, with the letters within a word in random order. The last
+   page has the hiding instructions and the answer key, so keep it for
+   yourself.
 
 ## License
 

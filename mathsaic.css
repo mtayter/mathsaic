@@ -1,20 +1,65 @@
-#mathsaic_options, #mathsaic_puzzle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  padding: 10px;
+body {
+  font-family: sans-serif;
+  margin: 0;
 }
+
 #mathsaic_options {
-  left: 0;
-  width: 200px;
+  padding: 16px 20px;
   background: #eee;
 }
 #mathsaic_puzzle {
-  left: 200px;
-  right: 0;
+  padding: 10px;
   background: white;
 }
 
+#mathsaic_options h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+#mathsaic_options h2 {
+  font-size: 17px;
+  margin: 18px 0 8px;
+}
+#mathsaic_options .intro,
+#mathsaic_options .hint {
+  max-width: 720px;
+  margin: 4px 0 10px;
+}
+
+.player-row {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  background: #f8f8f8;
+  padding: 10px 12px;
+  margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  max-width: 980px;
+}
+.player-head {
+  font-weight: bold;
+  width: 100%;
+}
+.player-row label {
+  white-space: nowrap;
+}
+.color-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.color-label {
+  font-size: 13px;
+}
+.swatches {
+  display: inline-flex;
+  gap: 3px;
+}
+.word-row {
+  margin: 6px 0;
+}
 
 table {
   border-collapse: collapse;
@@ -35,6 +80,7 @@ td {
   border-style: solid;
   border-width: 1px;
   -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .letters td {
   border-right: none;
@@ -47,23 +93,95 @@ table.key {
   width: 14px;
   height: 14px;
   cursor: pointer;
-  margin-left: 20px;
+  display: inline-block;
 }
 .selected {
-  border-style: solid;
-  border-color: black;
-  border-width: 2px;
-  margin-left: 17px;
+  outline: 2px solid black;
+  outline-offset: 1px;
+}
+
+/* ---- scavenger hunt output ------------------------------------------- */
+
+.print-note {
+  max-width: 800px;
+  margin: 12px auto;
+  padding: 10px 14px;
+  background: #eef6ee;
+  border: 1px solid #9c9;
+  border-radius: 6px;
+}
+
+.hunt-page {
+  position: relative;
+  max-width: 800px;
+  min-height: 560px;
+  margin: 18px auto;
+  padding: 30px 20px 70px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hunt-puzzle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hunt-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.hunt-final {
+  align-items: flex-start;
+}
+.hunt-final h2 {
+  margin: 10px 0;
+}
+.instructions {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+.answer-word {
+  margin-bottom: 22px; /* blank line between words */
+}
+.answer-line {
+  font-size: 18px;
+  line-height: 1.45;
+}
+.answer-letter {
+  display: inline-block;
+  width: 28px;
+  font-weight: bold;
+}
+.answer-footer {
+  color: #333;
 }
 
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #mathsaic_puzzle, #mathsaic_puzzle * {
-    visibility: visible;
+  #mathsaic_options,
+  .print-note {
+    display: none;
   }
   #mathsaic_puzzle {
-    left: 0;
+    padding: 0;
+  }
+  .hunt-page {
+    border: none;
+    margin: 0;
+    max-width: none;
+    height: 100vh;
+    page-break-after: always;
+    break-after: page;
+  }
+  .hunt-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 }
