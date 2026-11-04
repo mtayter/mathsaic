@@ -332,7 +332,7 @@ mathsaic.options = (function() {
       + '<p class="intro">Build a scavenger hunt out of Mathsaic letter puzzles. '
       + 'Each word is a clue as to where the next word (or the final prize) can be found. '
       + 'The letters of each word are split between the players, so the team has to solve '
-      + 'everyone\'s puzzles and put the letters together to read each clue.</p>'
+      + 'everyone\'s puzzles and descramble the letters to read each clue.</p>'
       + '</div>'
 
       + '<section class="card">'
