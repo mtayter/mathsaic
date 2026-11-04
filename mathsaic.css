@@ -322,12 +322,19 @@ table.key {
   #mathsaic_puzzle {
     padding: 0;
   }
-  /* Do NOT size print pages with 100vh: phone print pipelines measure vh
-     taller than the printable area, which splits the page box across two
-     sheets and strands the bottom-anchored footer on its own page.
-     Instead each page sizes to its content, may not break inside itself,
-     and the footer flows right under the puzzle (still centered), so it
-     always lands on the same sheet as its puzzle. */
+  /* Footer placement: do NOT size print pages with 100vh (phone print
+     pipelines measure vh taller than the printable area, which split the
+     page box and stranded the bottom-anchored footer on its own sheet).
+     Instead the stylesheet sets its own @page margins, and each puzzle
+     page is a box of fixed physical height — 248mm, safely shorter than
+     the printable height of both Letter (259mm at these margins) and A4
+     (277mm) — with the footer anchored to the bottom of the box. The
+     leftover slack plus break-inside: avoid keep the footer on the same
+     sheet as its puzzle, near the bottom of the page. */
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
   .hunt-page {
     border: none;
     border-radius: 0;
@@ -341,15 +348,17 @@ table.key {
     page-break-after: always;
     break-after: page;
   }
-  /* puzzle pages always fit on one sheet, so forbid breaking inside them;
-     the final page may legitimately be long, so let it break naturally */
+  /* puzzle pages get the fixed physical height; the final page may
+     legitimately be long, so it sizes to content and breaks naturally */
   .hunt-page:not(.hunt-final) {
+    height: 248mm;
     page-break-inside: avoid;
     break-inside: avoid;
   }
   .hunt-footer {
-    position: static;
-    margin-top: 40px;
+    position: absolute;
+    bottom: 0;
+    margin-top: 0;
     text-align: center;
   }
   .hunt-page:last-child {
