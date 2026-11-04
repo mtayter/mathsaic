@@ -83,7 +83,7 @@ mathsaic.options = (function() {
       }
       html += '<div class="player-row">'
             +   '<div class="player-head">🧩 Player ' + (p + 1) + '</div>'
-            +   '<label class="field">name <input type="text" class="player-name" id="player_name_' + p + '" size="14" placeholder="e.g. Hannah"></label>'
+            +   '<label class="field">name <input type="text" class="player-name" id="player_name_' + p + '" size="14"' + (p == 0 ? ' placeholder="e.g. Hannah"' : '') + '></label>'
             +   '<span class="op-group">';
       for(var o = 0; o < OPERATIONS.length; o++) {
         html += '<label class="check">'
@@ -126,7 +126,7 @@ mathsaic.options = (function() {
     var html = '';
     for(var w = 0; w < count; w++) {
       html += '<div class="word-row"><label class="field">word ' + (w + 1) + ' '
-            + '<input type="text" class="hunt-word" id="hunt_word_' + w + '" size="18" placeholder="e.g. attic">'
+            + '<input type="text" class="hunt-word" id="hunt_word_' + w + '" size="18"' + (w == 0 ? ' placeholder="e.g. attic"' : '') + '>'
             + '</label></div>';
     }
     $('#words_container').html(html);
