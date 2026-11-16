@@ -66,6 +66,20 @@ mathsaic.options = (function() {
     return html;
   }
 
+  // If a count box is left blank (or invalid) when the user leaves it,
+  // put the current number back — the number of rows actually on screen —
+  // instead of leaving an empty box that silently breaks generation.
+  function restoreCount(inputSel, rowSel) {
+    var $input = $(inputSel);
+    var value = parseInt($input.val(), 10);
+    var max = parseInt($input.attr('max'), 10);
+    if(isNaN(value) || value < 1) {
+      $input.val($(rowSel).length || 1);
+    } else if(!isNaN(max) && value > max) {
+      $input.val(max);
+    }
+  }
+
   function buildPlayerRows() {
     var count = parseInt($('#num_players').val(), 10);
     if(isNaN(count) || count < 1) {
@@ -156,6 +170,9 @@ mathsaic.options = (function() {
   function gatherPlayers() {
     var players = [];
     var count = parseInt($('#num_players').val(), 10);
+    if(isNaN(count) || count < 1) {
+      count = $('.player-row').length; // backstop: use the rows on screen
+    }
     for(var p = 0; p < count; p++) {
       var name = $.trim($('#player_name_' + p).val());
       if(!name) {
@@ -193,6 +210,9 @@ mathsaic.options = (function() {
     var letters = mathsaic.puzzle.getKeys();
     var words = [];
     var count = parseInt($('#num_words').val(), 10);
+    if(isNaN(count) || count < 1) {
+      count = $('.hunt-word').length; // backstop: use the boxes on screen
+    }
     for(var w = 0; w < count; w++) {
       var word = $.trim($('#hunt_word_' + w).val()).toLowerCase();
       if(!word) {
@@ -371,6 +391,8 @@ mathsaic.options = (function() {
 
     $('#num_players').on('change', buildPlayerRows);
     $('#num_words').on('change', buildWordInputs);
+    $('#num_players').on('blur', function() { restoreCount('#num_players', '.player-row'); });
+    $('#num_words').on('blur', function() { restoreCount('#num_words', '.hunt-word'); });
     $('#create_hunt').on('click', launchHunt);
   }
 
