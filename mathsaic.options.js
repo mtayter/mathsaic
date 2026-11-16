@@ -66,74 +66,62 @@ mathsaic.options = (function() {
     return html;
   }
 
-  // If a count box is left blank (or invalid) when the user leaves it,
-  // put the current number back — the number of rows actually on screen —
-  // instead of leaving an empty box that silently breaks generation.
-  function restoreCount(inputSel, rowSel) {
-    var $input = $(inputSel);
-    var value = parseInt($input.val(), 10);
-    var max = parseInt($input.attr('max'), 10);
-    if(isNaN(value) || value < 1) {
-      $input.val($(rowSel).length || 1);
-    } else if(!isNaN(max) && value > max) {
-      $input.val(max);
-    }
+  // The rows on screen ARE the list: Add/Remove buttons change them, and
+  // the state is always snapshotted from the DOM before re-rendering, so
+  // nobody's settings are lost when a row is added or removed.
+
+  function defaultPlayerState(idx) {
+    return { name: '', operations: ['+', '-'], negative: false, level: '0', theme: idx % themes.length };
   }
 
-  function buildPlayerRows() {
-    var count = parseInt($('#num_players').val(), 10);
-    if(isNaN(count) || count < 1) {
-      return;
-    }
-
-    // preserve everything already entered for existing players (name,
-    // operations, negatives, level; the color theme lives in playerThemes)
-    var saved = [];
+  function snapshotPlayerState() {
+    var state = [];
     $('.player-row').each(function(i) {
       var $row = $(this);
-      saved[i] = {
+      state[i] = {
         name: $row.find('.player-name').val(),
         operations: $row.find('.player-op:checked').map(function() { return this.value; }).get(),
         negative: $row.find('.player-negative').prop('checked'),
-        level: $row.find('.player-level').val()
+        level: $row.find('.player-level').val(),
+        theme: playerThemes[i] != null ? playerThemes[i] : (i % themes.length)
       };
     });
+    return state;
+  }
 
+  function renderPlayerRows(state) {
+    playerThemes = state.map(function(s) { return s.theme; });
     var html = '';
-    for(var p = 0; p < count; p++) {
-      if(playerThemes[p] == null) {
-        playerThemes[p] = p % themes.length;
-      }
-      var prev = saved[p];
-      var level = prev ? prev.level : '0';
+    for(var p = 0; p < state.length; p++) {
+      var prev = state[p];
       html += '<div class="player-row">'
-            +   '<div class="player-head">🧩 Player ' + (p + 1) + '</div>'
+            +   '<div class="player-head">🧩 Player ' + (p + 1)
+            +     (state.length > 1 ? ' <button type="button" class="btn-delete" onClick="mathsaic.options.deletePlayer(' + p + ')" title="Remove this player">✕</button>' : '')
+            +   '</div>'
             +   '<label class="field">name <input type="text" class="player-name" id="player_name_' + p + '" size="14"' + (p == 0 ? ' placeholder="e.g. Hannah"' : '') + '></label>'
             +   '<span class="op-group">';
       for(var o = 0; o < OPERATIONS.length; o++) {
         var opVal = OPERATIONS[o].value;
-        var checked = prev ? (prev.operations.indexOf(opVal) != -1)
-                           : (opVal == '+' || opVal == '-');
         html += '<label class="check">'
               + '<input type="checkbox" class="player-op" data-player="' + p + '" value="' + opVal + '"'
-              + (checked ? ' checked' : '')
+              + (prev.operations.indexOf(opVal) != -1 ? ' checked' : '')
               + '> ' + OPERATIONS[o].label + '</label>';
       }
       html +=   '</span>'
-            +   '<label class="check"><input type="checkbox" class="player-negative" id="player_negative_' + p + '"' + (prev && prev.negative ? ' checked' : '') + '> negatives?</label>'
+            +   '<label class="check"><input type="checkbox" class="player-negative" id="player_negative_' + p + '"' + (prev.negative ? ' checked' : '') + '> negatives?</label>'
             +   '<label class="field">level <select class="player-level" id="player_level_' + p + '">'
-            +     '<option value="0"' + (level == '0' ? ' selected' : '') + '>easy</option>'
-            +     '<option value="1"' + (level == '1' ? ' selected' : '') + '>medium</option>'
-            +     '<option value="2"' + (level == '2' ? ' selected' : '') + '>hard</option>'
+            +     '<option value="0"' + (prev.level == '0' ? ' selected' : '') + '>easy</option>'
+            +     '<option value="1"' + (prev.level == '1' ? ' selected' : '') + '>medium</option>'
+            +     '<option value="2"' + (prev.level == '2' ? ' selected' : '') + '>hard</option>'
             +   '</select></label>'
             +   '<span class="color-group"><span class="color-label">colors</span>' + themeSwatches(p) + '</span>'
             + '</div>';
     }
     $('#players_container').html(html);
 
-    for(var q = 0; q < count; q++) {
-      if(saved[q] && saved[q].name) {
-        $('#player_name_' + q).val(saved[q].name);
+    for(var q = 0; q < state.length; q++) {
+      if(state[q].name) {
+        $('#player_name_' + q).val(state[q].name);
       }
       var chosen = playerThemes[q];
       playerThemes[q] = null;
@@ -141,38 +129,60 @@ mathsaic.options = (function() {
     }
   }
 
+  function addPlayer() {
+    var state = snapshotPlayerState();
+    state.push(defaultPlayerState(state.length));
+    renderPlayerRows(state);
+  }
+
+  function deletePlayer(idx) {
+    var state = snapshotPlayerState();
+    if(state.length <= 1) { return; } // always keep at least one player
+    state.splice(idx, 1);
+    renderPlayerRows(state);
+  }
+
   // ---- word inputs ---------------------------------------------------------
 
-  function buildWordInputs() {
-    var count = parseInt($('#num_words').val(), 10);
-    if(isNaN(count) || count < 1) {
-      return;
-    }
-    var saved = [];
-    $('.hunt-word').each(function(i) { saved[i] = this.value; });
+  function snapshotWordState() {
+    return $('.hunt-word').map(function() { return this.value; }).get();
+  }
 
+  function renderWordInputs(state) {
     var html = '';
-    for(var w = 0; w < count; w++) {
+    for(var w = 0; w < state.length; w++) {
       html += '<div class="word-row"><label class="field">word ' + (w + 1) + ' '
             + '<input type="text" class="hunt-word" id="hunt_word_' + w + '" size="18"' + (w == 0 ? ' placeholder="e.g. attic"' : '') + '>'
-            + '</label></div>';
+            + '</label>'
+            + (state.length > 1 ? ' <button type="button" class="btn-delete" onClick="mathsaic.options.deleteWord(' + w + ')" title="Remove this word">✕</button>' : '')
+            + '</div>';
     }
     $('#words_container').html(html);
-    for(var i = 0; i < count; i++) {
-      if(saved[i]) {
-        $('#hunt_word_' + i).val(saved[i]);
+    for(var i = 0; i < state.length; i++) {
+      if(state[i]) {
+        $('#hunt_word_' + i).val(state[i]);
       }
     }
+  }
+
+  function addWord() {
+    var state = snapshotWordState();
+    state.push('');
+    renderWordInputs(state);
+  }
+
+  function deleteWord(idx) {
+    var state = snapshotWordState();
+    if(state.length <= 1) { return; } // always keep at least one word
+    state.splice(idx, 1);
+    renderWordInputs(state);
   }
 
   // ---- gathering + validation ----------------------------------------------
 
   function gatherPlayers() {
     var players = [];
-    var count = parseInt($('#num_players').val(), 10);
-    if(isNaN(count) || count < 1) {
-      count = $('.player-row').length; // backstop: use the rows on screen
-    }
+    var count = $('.player-row').length; // the rows on screen are the list
     for(var p = 0; p < count; p++) {
       var name = $.trim($('#player_name_' + p).val());
       if(!name) {
@@ -209,10 +219,7 @@ mathsaic.options = (function() {
   function gatherWords() {
     var letters = mathsaic.puzzle.getKeys();
     var words = [];
-    var count = parseInt($('#num_words').val(), 10);
-    if(isNaN(count) || count < 1) {
-      count = $('.hunt-word').length; // backstop: use the boxes on screen
-    }
+    var count = $('.hunt-word').length; // the boxes on screen are the list
     for(var w = 0; w < count; w++) {
       var word = $.trim($('#hunt_word_' + w).val()).toLowerCase();
       if(!word) {
@@ -371,34 +378,36 @@ mathsaic.options = (function() {
 
       + '<section class="card">'
       + '<h2>👥 Players</h2>'
-      + '<label class="field">how many players? <input type="number" id="num_players" min="1" max="12" value="2"></label>'
       + '<div id="players_container"></div>'
+      + '<p><button type="button" id="add_player" class="btn-add">➕ Add player</button></p>'
       + '</section>'
 
       + '<section class="card">'
       + '<h2>🔤 Words</h2>'
       + '<p class="hint">Each word is a clue as to where the next word (or final prize) can be found.</p>'
-      + '<label class="field">how many words? <input type="number" id="num_words" min="1" max="20" value="3"></label>'
       + '<div id="words_container"></div>'
+      + '<p><button type="button" id="add_word" class="btn-add">➕ Add word</button></p>'
       + '</section>'
 
       + '<p class="create-row"><button type="button" id="create_hunt" class="btn-primary">🎯 Create Scavenger Hunt</button></p>';
 
     $container.html(input);
 
-    buildPlayerRows();
-    buildWordInputs();
+    renderPlayerRows([defaultPlayerState(0), defaultPlayerState(1)]);
+    renderWordInputs(['', '', '']);
 
-    $('#num_players').on('change', buildPlayerRows);
-    $('#num_words').on('change', buildWordInputs);
-    $('#num_players').on('blur', function() { restoreCount('#num_players', '.player-row'); });
-    $('#num_words').on('blur', function() { restoreCount('#num_words', '.hunt-word'); });
+    $('#add_player').on('click', addPlayer);
+    $('#add_word').on('click', addWord);
     $('#create_hunt').on('click', launchHunt);
   }
 
   return {
     init: init,
     selectTheme: selectTheme,
+    addPlayer: addPlayer,
+    deletePlayer: deletePlayer,
+    addWord: addWord,
+    deleteWord: deleteWord,
     launchHunt: launchHunt
   };
 
